@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Class1.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Xamarin.Forms" Version="4.4.0.991537" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XamarinDevOps\XamarinDevOps.csproj" />
+  </ItemGroup>
+</Project>
