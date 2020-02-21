@@ -1,4 +1,4 @@
-# Automate your process using Azure DevOps
+# Automate your mobile development process using Azure DevOps
 
 Sample source code for the following blog post :
 
