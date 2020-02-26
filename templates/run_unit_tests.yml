@@ -1,0 +1,22 @@
+parameters:
+  solutionPath: ''
+  projects: ''
+  buildConfiguration: ''
+
+steps:
+  - template: init_restore.yml
+    parameters:
+      solutionPath: '${{ parameters.solutionPath }}'
+      
+  - task: DotNetCoreCLI@2
+    displayName: Build
+    inputs:
+      command: build
+      projects: '${{ parameters.projects }}'
+      arguments: '--configuration ${{ parameters.buildConfiguration }}'
+
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: test
+      projects: '${{ parameters.projects }}'
+      arguments: '--configuration ${{ parameters.buildConfiguration }}'

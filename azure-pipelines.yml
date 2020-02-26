@@ -1,0 +1,18 @@
+trigger:
+  - master
+
+pool:
+  vmImage: 'macOS-10.14'
+
+variables:
+  - name: buildConfiguration
+    value: "Release"
+  - name: projects
+    value: "$(Build.SourcesDirectory)/XamarinDevOps.Tests/*.csproj"
+
+steps:
+  - template: templates/run_unit_tests.yml
+    parameters:
+      solutionPath: '$(solutionPath)'
+      projects: '$(Build.SourcesDirectory)/XamarinDevOps.Tests/*.csproj'
+      buildConfiguration: '$(buildConfiguration)'
