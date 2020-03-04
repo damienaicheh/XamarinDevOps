@@ -1,0 +1,26 @@
+parameters:
+  xamarinSdkVersion: ''
+  packageFormat: 'apk'
+  projectFile: ''
+  buildConfiguration: ''
+  apksignerKeystoreFile: ''
+  apksignerKeystorePassword: ''
+  apksignerKeyPassword: ''
+
+steps:
+- script: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh ${{ parameters.xamarinSdkVersion }}
+  displayName: 'Select the Xamarin SDK version'
+  enabled: true
+
+- task: DownloadSecureFile@1
+  name: keyStore
+  displayName: "Download keystore from secure files"
+  inputs:
+    secureFile: '${{ parameters.apksignerKeystoreFile }}'
+
+- task: Bash@3
+  displayName: "Download keystore from secure files"
+  inputs:
+    targetType: "inline"
+    script: |
+      msbuild -restore ${{ parameters.projectFile }} -t:SignAndroidPackage -p:AndroidPackageFormat=${{ parameters.packageFormat }} -p:Configuration=${{ parameters.buildConfiguration }} -p:AndroidKeyStore=True -p:AndroidSigningKeyStore=$(keyStore.secureFilePath) -p:AndroidSigningStorePass=${{ parameters.apksignerKeystorePassword }} -p:AndroidSigningKeyAlias=${{ parameters.apksignerKeystoreAlias }} -p:AndroidSigningKeyPass=${{ parameters.apksignerKeyPassword }}

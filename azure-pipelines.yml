@@ -5,14 +5,69 @@ pool:
   vmImage: 'macOS-10.14'
 
 variables:
-  - name: buildConfiguration
-    value: "Release"
-  - name: projects
-    value: "$(Build.SourcesDirectory)/XamarinDevOps.Tests/*.csproj"
+  - group: xamarin-full-pipeline
+  - template: templates/variables.yml
 
-steps:
-  - template: templates/run_unit_tests.yml
-    parameters:
-      solutionPath: '$(solutionPath)'
-      projects: '$(Build.SourcesDirectory)/XamarinDevOps.Tests/*.csproj'
-      buildConfiguration: '$(buildConfiguration)'
+schedules:
+- cron: "0 0 * * 1-5"
+  displayName: Daily midnight build
+  branches:
+    include:
+    - master
+
+stages:
+  - stage: Run_Unit_Tests
+    jobs:
+      - job:
+        displayName: 'Run Unit Tests'
+        steps:
+          - template: templates/run_unit_tests.yml
+            parameters:
+              solutionPath: '$(solutionPath)'
+              projects: '$(Build.SourcesDirectory)/XamarinDevOps.Tests/*.csproj'
+              buildConfiguration: '$(buildConfiguration)'
+  - stage: Build_Xamarin_Android
+    dependsOn: Run_Unit_Tests
+    jobs:
+      - job:
+        displayName: 'Build Xamarin.Android'
+        workspace:
+          clean: all
+        steps:
+          - template: templates/init_restore.yml
+            parameters:
+              solutionPath: '$(solutionPath)'
+          
+          - template: templates/build_xamarin_android.yml
+            parameters:
+              xamarinSdkVersion: '$(xamarinSdkVersion)'
+              packageFormat: 'aab' # Choose apk or aab depending on your needs
+              projectFile: '$(Build.SourcesDirectory)/XamarinDevOps.Android/*.csproj'
+              buildConfiguration: '$(buildConfiguration)'
+              apksignerKeystoreFile: 'production.jks'
+              apksignerKeystorePassword: $(keystore.password)
+              apksignerKeystoreAlias: $(key.alias)
+              apksignerKeyPassword: $(key.password)
+
+  - stage: Build_Xamarin_iOS
+    dependsOn: Run_Unit_Tests
+    jobs:
+      - job:
+        displayName: 'Build Xamarin.iOS'
+        workspace:
+          clean: all
+        steps:
+          - template: templates/init_restore.yml
+            parameters:
+              solutionPath: '$(solutionPath)'
+
+          - template: templates/build_xamarin_ios_ipa.yml
+            parameters:
+              xamarinSdkVersion: '$(xamarinSdkVersion)'
+              p12FileName: '$(p12FileName)'
+              p12Password: '$(p12Password)'
+              provisioningProfile: '$(provisioningProfile)'
+              solutionPath: '$(solutionPath)'
+              buildConfiguration: '$(buildConfiguration)'
+              signingIdentity: '$(APPLE_CERTIFICATE_SIGNING_IDENTITY)'
+              signingProvisioningProfileID: '$(APPLE_PROV_PROFILE_UUID)'

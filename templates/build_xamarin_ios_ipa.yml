@@ -1,0 +1,37 @@
+parameters:
+  xamarinSdkVersion: ''
+  p12FileName: ''
+  p12Password: ''
+  provisioningProfile: ''
+  solutionPath: ''
+  buildConfiguration: ''
+  signingIdentity: ''
+  signingProvisioningProfileID: ''
+
+steps:
+  - script: sudo $AGENT_HOMEDIRECTORY/scripts/select-xamarin-sdk.sh ${{ parameters.xamarinSdkVersion }}
+    displayName: 'Select the Xamarin SDK version'
+    enabled: true
+
+  - task: InstallAppleCertificate@2
+    inputs:
+      certSecureFile: '${{ parameters.p12FileName }}'
+      certPwd: '${{ parameters.p12Password }}'
+      keychain: 'temp'
+      deleteCert: true
+
+  - task: InstallAppleProvisioningProfile@1
+    inputs:
+      provisioningProfileLocation: 'secureFiles'
+      provProfileSecureFile: '${{ parameters.provisioningProfile }}'
+      removeProfile: true
+      
+  - task: XamariniOS@2
+    inputs:
+      solutionFile: '${{ parameters.solutionPath }}'
+      configuration: '${{ parameters.buildConfiguration }}'
+      packageApp: true
+      buildForSimulator: false
+      runNugetRestore: false
+      signingIdentity: '${{ parameters.signingIdentity }}'
+      signingProvisioningProfileID: '${{ parameters.signingProvisioningProfileID }}'

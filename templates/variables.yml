@@ -1,0 +1,7 @@
+variables:
+  - name: xamarinSdkVersion
+    value: '6_6_0'
+  - name: solutionPath
+    value: '**/*.sln'
+  - name: buildConfiguration
+    value: 'Release'
