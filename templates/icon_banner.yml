@@ -1,0 +1,13 @@
+parameters:
+  sourceFolder: '$(Build.SourcesDirectory)'
+  contents: '**/*.png'
+  versionNamePosition: 'bottomRight'
+  versionName: ''
+
+steps:
+  - task: LaunchIconBadge@1
+    inputs:
+      sourceFolder: '${{ parameters.sourceFolder }}'
+      contents: '${{ parameters.contents }}'
+      bannerVersionNamePosition: '${{ parameters.versionNamePosition }}'
+      bannerVersionNameText: '${{ parameters.versionName }}'

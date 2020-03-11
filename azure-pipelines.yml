@@ -26,6 +26,7 @@ stages:
               solutionPath: '$(solutionPath)'
               projects: '$(Build.SourcesDirectory)/XamarinDevOps.Tests/*.csproj'
               buildConfiguration: '$(buildConfiguration)'
+
   - stage: Build_Xamarin_Android
     dependsOn: Run_Unit_Tests
     jobs:
@@ -37,6 +38,21 @@ stages:
           - template: templates/init_restore.yml
             parameters:
               solutionPath: '$(solutionPath)'
+
+          - template: templates/bump_android_manifest_version.yml
+            parameters:
+              androidManifestPath: '$(Build.SourcesDirectory)/XamarinDevOps.Android/Properties/AndroidManifest.xml'
+
+          - template: templates/icon_banner.yml
+            parameters:
+              sourceFolder: '$(Build.SourcesDirectory)/XamarinDevOps.Android/Resources'
+              contents: '**/icon.png'
+              versionName: '$(buildConfiguration)'
+
+          - template: templates/copy_content_file.yml
+            parameters:
+              sourceFile: '$(Build.SourcesDirectory)/configurations/config-$(buildConfiguration).json'
+              targetFile: '$(Build.SourcesDirectory)/XamarinDevOps.Android/Assets/config.json'
           
           - template: templates/build_xamarin_android.yml
             parameters:
@@ -60,6 +76,20 @@ stages:
           - template: templates/init_restore.yml
             parameters:
               solutionPath: '$(solutionPath)'
+
+          - template: templates/bump_ios_version.yml
+            parameters:
+              infoPlistPath: '$(Build.SourcesDirectory)/XamarinDevOps.iOS/Info.plist'
+
+          - template: templates/icon_banner.yml
+            parameters:
+              sourceFolder: '$(Build.SourcesDirectory)/XamarinDevOps.iOS/Assets.xcassets/AppIcon.appiconset'
+              versionName: '$(buildConfiguration)'
+
+          - template: templates/copy_content_file.yml
+            parameters:
+              sourceFile: '$(Build.SourcesDirectory)/configurations/config-$(buildConfiguration).json'
+              targetFile: '$(Build.SourcesDirectory)/XamarinDevOps.iOS/Assets/config.json'
 
           - template: templates/build_xamarin_ios_ipa.yml
             parameters:

@@ -1,0 +1,10 @@
+parameters:
+  sourceFile: ''
+  targetFile: ''
+  
+steps:
+- task: Bash@3
+  inputs: 
+    targetType: 'inline'
+    script: cp -fr ${{ parameters.sourceFile }} ${{ parameters.targetFile }}
+    

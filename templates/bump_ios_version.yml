@@ -1,0 +1,8 @@
+parameters:
+  infoPlistPath: ''
+
+steps:
+  - task: ExtractVersionFromTag@1
+  - task: UpdateiOSVersionInfoPlist@1
+    inputs:
+      infoPlistPath: '${{ parameters.infoPlistPath }}'
