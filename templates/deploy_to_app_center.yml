@@ -1,0 +1,25 @@
+parameters:
+  serverEndpoint: 'VSAC'
+  appSlug: ''
+  fileToPublish: ''
+  distributionGroupId: ''
+  releaseNotesInput: 'New Version'
+
+steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download artifacts'
+    inputs:
+      buildType: 'current'
+      downloadType: 'specific'
+      downloadPath: 'releases_drop'
+
+  - task: AppCenterDistribute@3
+    displayName: 'Deploy to Visual Studio App Center'
+    inputs:
+      serverEndpoint: '${{ parameters.serverEndpoint }}'
+      appSlug: '${{ parameters.appSlug }}'
+      appFile: 'releases_drop/${{ parameters.fileToPublish }}'
+      releaseNotesOption: 'input'
+      releaseNotesInput: '${{ parameters.releaseNotesInput }}'
+      destinationType: 'groups'
+      distributionGroupId: '${{ parameters.distributionGroupId }}'

@@ -57,13 +57,19 @@ stages:
           - template: templates/build_xamarin_android.yml
             parameters:
               xamarinSdkVersion: '$(xamarinSdkVersion)'
-              packageFormat: 'aab' # Choose apk or aab depending on your needs
+              packageFormat: 'apk' # Choose apk or aab depending on your needs
               projectFile: '$(Build.SourcesDirectory)/XamarinDevOps.Android/*.csproj'
               buildConfiguration: '$(buildConfiguration)'
               apksignerKeystoreFile: 'production.jks'
               apksignerKeystorePassword: $(keystore.password)
               apksignerKeystoreAlias: $(key.alias)
               apksignerKeyPassword: $(key.password)
+          
+          - template: templates/publish_artifacts.yml
+            parameters:
+              sourceFolder: '$(Build.SourcesDirectory)/XamarinDevOps.Android/bin/$(buildConfiguration)'
+              contents: '*Signed.apk'
+              artifactName: '$(buildConfiguration)_android'
 
   - stage: Build_Xamarin_iOS
     dependsOn: Run_Unit_Tests
@@ -101,3 +107,33 @@ stages:
               buildConfiguration: '$(buildConfiguration)'
               signingIdentity: '$(APPLE_CERTIFICATE_SIGNING_IDENTITY)'
               signingProvisioningProfileID: '$(APPLE_PROV_PROFILE_UUID)'
+
+          - template: templates/publish_artifacts.yml
+            parameters:
+              sourceFolder: '$(Build.SourcesDirectory)/XamarinDevOps.iOS/bin/iPhone/$(buildConfiguration)'
+              contents: '*.ipa'
+              artifactName: '$(buildConfiguration)_ios'
+
+  - stage: Deploy_Android
+    dependsOn: Build_Xamarin_Android
+    jobs:
+      - job:
+        displayName: 'Deploy Xamarin.Android'
+        steps:
+          - template: templates/deploy_to_app_center.yml
+            parameters:
+              appSlug: '$(androidAppSlug)'
+              fileToPublish: '$(buildConfiguration)_android/*.apk'
+              distributionGroupId: '$(androidDistributionGroupId)'
+
+  - stage: Deploy_iOS
+    dependsOn: Build_Xamarin_iOS
+    jobs:
+      - job:
+        displayName: 'Deploy Xamarin.iOS'
+        steps:
+          - template: templates/deploy_to_app_center.yml
+            parameters:
+              appSlug: '$(iOSAppSlug)'
+              fileToPublish: '$(buildConfiguration)_ios/*.ipa'
+              distributionGroupId: '$(iOSDistributionGroupId)'

@@ -1,0 +1,18 @@
+parameters:  
+  sourceFolder: ''
+  contents: ''
+  artifactName: ''
+
+steps: 
+  - task: CopyFiles@2
+    displayName: 'Copy deliverables'
+    inputs:
+      SourceFolder: '${{ parameters.sourceFolder }}'
+      Contents: '${{ parameters.contents }}'
+      TargetFolder: 'drop/${{ parameters.artifactName }}'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish release'
+    inputs:
+      pathToPublish: 'drop/${{ parameters.artifactName }}'
+      artifactName: '${{ parameters.artifactName }}'
