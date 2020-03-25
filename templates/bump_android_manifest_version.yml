@@ -1,8 +1,0 @@
-parameters:
-  androidManifestPath: ''
-
-steps:
-  - task: ExtractVersionFromTag@1
-  - task: UpdateAndroidVersionManifest@1
-    inputs:
-      androidManifestPath: '${{ parameters.androidManifestPath }}'

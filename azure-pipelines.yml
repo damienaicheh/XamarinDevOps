@@ -4,9 +4,17 @@ trigger:
 pool:
   vmImage: 'macOS-10.14'
 
+resources:
+  repositories:
+  - repository: templates
+    type: github
+    name: damienaicheh/AzureDevOpsTemplates
+    ref: refs/tags/v1.0.0
+    endpoint: GitHubTemplates
+
 variables:
   - group: xamarin-full-pipeline
-  - template: templates/variables.yml
+  - template: variables.yml
 
 schedules:
 - cron: "0 0 * * 1-5"
@@ -21,7 +29,7 @@ stages:
       - job:
         displayName: 'Run Unit Tests'
         steps:
-          - template: templates/run_unit_tests.yml
+          - template: run_unit_tests.yml@templates
             parameters:
               solutionPath: '$(solutionPath)'
               projects: '$(Build.SourcesDirectory)/XamarinDevOps.Tests/*.csproj'
@@ -35,26 +43,26 @@ stages:
         workspace:
           clean: all
         steps:
-          - template: templates/init_restore.yml
+          - template: init_restore.yml@templates
             parameters:
               solutionPath: '$(solutionPath)'
 
-          - template: templates/bump_android_manifest_version.yml
+          - template: bump_android_manifest_version.yml@templates
             parameters:
               androidManifestPath: '$(Build.SourcesDirectory)/XamarinDevOps.Android/Properties/AndroidManifest.xml'
 
-          - template: templates/icon_banner.yml
+          - template: icon_banner.yml@templates
             parameters:
               sourceFolder: '$(Build.SourcesDirectory)/XamarinDevOps.Android/Resources'
               contents: '**/icon.png'
               versionName: '$(buildConfiguration)'
 
-          - template: templates/copy_content_file.yml
+          - template: copy_content_file.yml@templates
             parameters:
               sourceFile: '$(Build.SourcesDirectory)/configurations/config-$(buildConfiguration).json'
               targetFile: '$(Build.SourcesDirectory)/XamarinDevOps.Android/Assets/config.json'
           
-          - template: templates/build_xamarin_android.yml
+          - template: build_xamarin_android.yml@templates
             parameters:
               xamarinSdkVersion: '$(xamarinSdkVersion)'
               packageFormat: 'apk' # Choose apk or aab depending on your needs
@@ -65,7 +73,7 @@ stages:
               apksignerKeystoreAlias: $(key.alias)
               apksignerKeyPassword: $(key.password)
           
-          - template: templates/publish_artifacts.yml
+          - template: publish_artifacts.yml@templates
             parameters:
               sourceFolder: '$(Build.SourcesDirectory)/XamarinDevOps.Android/bin/$(buildConfiguration)'
               contents: '*Signed.apk'
@@ -79,25 +87,25 @@ stages:
         workspace:
           clean: all
         steps:
-          - template: templates/init_restore.yml
+          - template: init_restore.yml@templates
             parameters:
               solutionPath: '$(solutionPath)'
 
-          - template: templates/bump_ios_version.yml
+          - template: bump_ios_version.yml@templates
             parameters:
               infoPlistPath: '$(Build.SourcesDirectory)/XamarinDevOps.iOS/Info.plist'
 
-          - template: templates/icon_banner.yml
+          - template: icon_banner.yml@templates
             parameters:
               sourceFolder: '$(Build.SourcesDirectory)/XamarinDevOps.iOS/Assets.xcassets/AppIcon.appiconset'
               versionName: '$(buildConfiguration)'
 
-          - template: templates/copy_content_file.yml
+          - template: copy_content_file.yml@templates
             parameters:
               sourceFile: '$(Build.SourcesDirectory)/configurations/config-$(buildConfiguration).json'
               targetFile: '$(Build.SourcesDirectory)/XamarinDevOps.iOS/Assets/config.json'
 
-          - template: templates/build_xamarin_ios_ipa.yml
+          - template: build_xamarin_ios_ipa.yml@templates
             parameters:
               xamarinSdkVersion: '$(xamarinSdkVersion)'
               p12FileName: '$(p12FileName)'
@@ -108,7 +116,7 @@ stages:
               signingIdentity: '$(APPLE_CERTIFICATE_SIGNING_IDENTITY)'
               signingProvisioningProfileID: '$(APPLE_PROV_PROFILE_UUID)'
 
-          - template: templates/publish_artifacts.yml
+          - template: publish_artifacts.yml@templates
             parameters:
               sourceFolder: '$(Build.SourcesDirectory)/XamarinDevOps.iOS/bin/iPhone/$(buildConfiguration)'
               contents: '*.ipa'
@@ -120,7 +128,7 @@ stages:
       - job:
         displayName: 'Deploy Xamarin.Android'
         steps:
-          - template: templates/deploy_to_app_center.yml
+          - template: deploy_to_app_center.yml@templates
             parameters:
               appSlug: '$(androidAppSlug)'
               fileToPublish: '$(buildConfiguration)_android/*.apk'
@@ -132,7 +140,7 @@ stages:
       - job:
         displayName: 'Deploy Xamarin.iOS'
         steps:
-          - template: templates/deploy_to_app_center.yml
+          - template: deploy_to_app_center.yml@templates
             parameters:
               appSlug: '$(iOSAppSlug)'
               fileToPublish: '$(buildConfiguration)_ios/*.ipa'

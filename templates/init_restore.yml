@@ -1,8 +1,0 @@
-parameters:
-  solutionPath: ''
-
-steps:
-- task: NuGetToolInstaller@1
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '${{ parameters.solutionPath }}'
