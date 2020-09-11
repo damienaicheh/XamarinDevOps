@@ -2,6 +2,10 @@ parameters:
   solutionPath: ''
 
 steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '2.2.100'
 - task: NuGetToolInstaller@1
 - task: NuGetCommand@2
   inputs:
